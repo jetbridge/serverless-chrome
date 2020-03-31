@@ -5,8 +5,8 @@
 # Build Chromium for Amazon Linux.
 # Assumes root privileges. Or, more likely, Docker—take a look at
 # the corresponding Dockerfile in this directory.
-# 
-# Requires 
+#
+# Requires
 #
 # Usage: ./build.sh
 #
@@ -20,27 +20,12 @@ VERSION=${VERSION:-master}
 
 printf "LANG=en_US.utf-8\nLC_ALL=en_US.utf-8" >> /etc/environment
 
-# install dependencies
-yum install epel-release -y
-yum install -y \
-  git redhat-lsb python bzip2 tar pkgconfig atk-devel \
-  alsa-lib-devel bison binutils brlapi-devel bluez-libs-devel \
-  bzip2-devel cairo-devel cups-devel dbus-devel dbus-glib-devel \
-  expat-devel fontconfig-devel freetype-devel gcc-c++ GConf2-devel \
-  glib2-devel glibc.i686 gperf glib2-devel gtk2-devel gtk3-devel \
-  java-1.*.0-openjdk-devel libatomic libcap-devel libffi-devel \
-  libgcc.i686 libgnome-keyring-devel libjpeg-devel libstdc++.i686 \
-  libX11-devel libXScrnSaver-devel libXtst-devel \
-  libxkbcommon-x11-devel ncurses-compat-libs nspr-devel nss-devel \
-  pam-devel pango-devel pciutils-devel pulseaudio-libs-devel \
-  zlib.i686 httpd mod_ssl php php-cli python-psutil wdiff --enablerepo=epel
-
 mkdir -p build/chromium
 
 cd build
 
 # install dept_tools
-git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git
 
 export PATH="/opt/gtk/bin:$PATH:$BUILD_BASE/build/depot_tools"
 
@@ -48,7 +33,7 @@ cd chromium
 
 # fetch chromium source code
 # ref: https://www.chromium.org/developers/how-tos/get-the-code/working-with-release-branches
-git clone https://chromium.googlesource.com/chromium/src.git
+git clone --depth 1 https://chromium.googlesource.com/chromium/src.git
 
 (
   cd src
@@ -102,7 +87,7 @@ strip -o "$BUILD_BASE/bin/headless-chromium" build/chromium/src/out/Headless/hea
 
 # Use UPX to package headless chromium
 # this adds 1-1.5 seconds of startup time so generally
-# not so great for use in AWS Lambda so we don't actually use it 
+# not so great for use in AWS Lambda so we don't actually use it
 # but left here in case someone finds it useful
 # yum install -y ucl ucl-devel --enablerepo=epel
 # cd build
