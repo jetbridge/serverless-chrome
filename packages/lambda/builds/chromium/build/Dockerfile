@@ -34,11 +34,12 @@ RUN  yum install -y \
   pulseaudio-libs-devel zlib.i686 httpd mod_ssl php php-cli python-psutil wdiff \
   xorg-x11-server-Xvfb
 
-ADD build.sh /
-ADD .gclient /build/chromium/
+# ADD .gclient /build/chromium/
 
 WORKDIR /build
 RUN git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git
+
+ADD build.sh /
 
 RUN sh /build.sh
 

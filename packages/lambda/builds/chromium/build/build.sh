@@ -21,9 +21,10 @@ VERSION=${VERSION:-master}
 printf "LANG=en_US.utf-8\nLC_ALL=en_US.utf-8" >> /etc/environment
 
 # install depot_tools
-export PATH="/opt/gtk/bin:$PATH:$BUILD_BASE/build/depot_tools"
+export PATH="/opt/gtk/bin:$PATH:$BUILD_BASE/depot_tools"
 
 # get chrome src
+mkdir chromium
 cd chromium
 fetch --nohooks --no-history chromium
 cd src
