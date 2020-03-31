@@ -13,47 +13,20 @@
 # Further documentation: https://github.com/adieuadieu/serverless-chrome/blob/develop/docs/chrome.md
 #
 
-set -e
+set -ex
 
 BUILD_BASE=$(pwd)
 VERSION=${VERSION:-master}
 
 printf "LANG=en_US.utf-8\nLC_ALL=en_US.utf-8" >> /etc/environment
 
-mkdir -p build/chromium
-
-cd build
-
-# install dept_tools
-git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git
-
+# install depot_tools
 export PATH="/opt/gtk/bin:$PATH:$BUILD_BASE/build/depot_tools"
 
+# get chrome src
 cd chromium
-
-# fetch chromium source code
-# ref: https://www.chromium.org/developers/how-tos/get-the-code/working-with-release-branches
-git clone --depth 1 https://chromium.googlesource.com/chromium/src.git
-
-(
-  cd src
-
-  # Do a pull because there are usually revisions pushed while we're cloning
-  git pull
-
-  # checkout the release tag
-  git checkout -b build "$VERSION"
-)
-
-# Checkout all the submodules at their branch DEPS revisions
-gclient sync --with_branch_heads --jobs 16
-
+fetch --nohooks --no-history chromium
 cd src
-
-# the following is no longer necessary since. left here for nostalgia or something.
-# ref: https://chromium.googlesource.com/chromium/src/+/1824e5752148268c926f1109ed7e5ef1d937609a%5E%21
-# tweak to disable use of the tmpfs mounted at /dev/shm
-# sed -e '/if (use_dev_shm) {/i use_dev_shm = false;\n' -i base/files/file_util_posix.cc
 
 #
 # tweak to keep Chrome from crashing after 4-5 Lambda invocations
@@ -64,19 +37,22 @@ SANDBOX_IPC_SOURCE_PATH="content/browser/sandbox_ipc_linux.cc"
 
 sed -e 's/PLOG(WARNING) << "poll";/PLOG(WARNING) << "poll"; failed_polls = 0;/g' -i "$SANDBOX_IPC_SOURCE_PATH"
 
+# install additional deps
+gclient runhooks
 
 # specify build flags
 mkdir -p out/Headless && \
   echo 'import("//build/args/headless.gn")' > out/Headless/args.gn && \
   echo 'is_debug = false' >> out/Headless/args.gn && \
   echo 'symbol_level = 0' >> out/Headless/args.gn && \
+  echo 'blink_symbol_level = 0' >> out/Headless/args.gn && \
   echo 'is_component_build = false' >> out/Headless/args.gn && \
   echo 'remove_webcore_debug_symbols = true' >> out/Headless/args.gn && \
   echo 'enable_nacl = false' >> out/Headless/args.gn && \
   gn gen out/Headless
 
 # build chromium headless shell
-ninja -C out/Headless headless_shell
+autoninja -C out/Headless headless_shell
 
 cp out/Headless/headless_shell "$BUILD_BASE/bin/headless-chromium-unstripped"
 

@@ -37,6 +37,9 @@ RUN  yum install -y \
 ADD build.sh /
 ADD .gclient /build/chromium/
 
+WORKDIR /build
+RUN git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git
+
 RUN sh /build.sh
 
 EXPOSE 9222
