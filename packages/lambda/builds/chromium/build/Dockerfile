@@ -32,7 +32,7 @@ RUN  yum install -y \
   libXScrnSaver-devel libXtst-devel libxkbcommon-x11-devel ncurses-compat-libs \
   nspr-devel nss-devel pam-devel pango-devel pciutils-devel \
   pulseaudio-libs-devel zlib.i686 httpd mod_ssl php php-cli python-psutil wdiff \
-  xorg-x11-server-Xvfb
+  xorg-x11-server-Xvfb glibc-devel
 
 # ADD .gclient /build/chromium/
 
@@ -40,6 +40,9 @@ WORKDIR /build
 RUN git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git
 
 ADD build.sh /
+WORKDIR /build/chromium
+RUN /build/depot_tools/fetch --nohooks --no-history chromium
+WORKDIR /build/chromium/src
 
 RUN sh /build.sh
 

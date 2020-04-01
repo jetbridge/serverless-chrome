@@ -24,10 +24,10 @@ printf "LANG=en_US.utf-8\nLC_ALL=en_US.utf-8" >> /etc/environment
 export PATH="/opt/gtk/bin:$PATH:$BUILD_BASE/depot_tools"
 
 # get chrome src
-mkdir chromium
-cd chromium
-fetch --nohooks --no-history chromium
-cd src
+# mkdir chromium
+# cd chromium
+# fetch --nohooks --no-history chromium
+# cd src
 
 #
 # tweak to keep Chrome from crashing after 4-5 Lambda invocations
